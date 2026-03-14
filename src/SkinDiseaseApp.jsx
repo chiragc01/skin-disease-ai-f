@@ -208,57 +208,57 @@ function Loader({ onDone }) {
 // ─────────────────────────────────────────────
 // LANDING PAGE
 // ─────────────────────────────────────────────
-function LandingPage({ onEnter }) {
-  const [exiting, setExiting] = useState(false);
+// function LandingPage({ onEnter }) {
+//   const [exiting, setExiting] = useState(false);
 
-  const handleEnter = () => {
-    setExiting(true);
-    setTimeout(onEnter, 600);
-  };
+//   const handleEnter = () => {
+//     setExiting(true);
+//     setTimeout(onEnter, 600);
+//   };
 
-  return (
-    <div className={"landing" + (exiting ? " exit" : "")}>
-      <div className="landing-badge">
-        <div className="live-dot" />
-        AI Skin Analysis · 7 Disease Classes
-      </div>
+//   return (
+//     <div className={"landing" + (exiting ? " exit" : "")}>
+//       <div className="landing-badge">
+//         <div className="live-dot" />
+//         AI Skin Analysis · 7 Disease Classes
+//       </div>
 
-      <h1 className="landing-title">
-        <span className="grad-text">Predict Skin</span>
-        <br />
-        <span className="grad-text">Disease Instantly</span>
-      </h1>
+//       <h1 className="landing-title">
+//         <span className="grad-text">Predict Skin</span>
+//         <br />
+//         <span className="grad-text">Disease Instantly</span>
+//       </h1>
 
-      <p className="landing-desc">
-        Upload a photo or use your camera. Our AI model trained on 10,000+ medical
-        images gives you an instant skin disease prediction with clear, actionable advice.
-      </p>
+//       <p className="landing-desc">
+//         Upload a photo or use your camera. Our AI model trained on 10,000+ medical
+//         images gives you an instant skin disease prediction with clear, actionable advice.
+//       </p>
 
-      <div className="feature-pills">
-        {["🔬 AI Powered", "📷 Live Camera", "⚡ Instant Results", "🩺 7 Disease Classes"].map(f => (
-          <div key={f} className="pill">{f}</div>
-        ))}
-      </div>
+//       <div className="feature-pills">
+//         {["🔬 AI Powered", "📷 Live Camera", "⚡ Instant Results", "🩺 7 Disease Classes"].map(f => (
+//           <div key={f} className="pill">{f}</div>
+//         ))}
+//       </div>
 
-      <div className="landing-cta">
-        <button className="btn-predict" onClick={handleEnter}>
-          🔬 Predict Disease
-          <span className="btn-arrow">→</span>
-        </button>
-        <p className="landing-note">No sign up required · Free to use</p>
-      </div>
+//       <div className="landing-cta">
+//         <button className="btn-predict" onClick={handleEnter}>
+//           🔬 Predict Disease
+//           <span className="btn-arrow">→</span>
+//         </button>
+//         <p className="landing-note">No sign up required · Free to use</p>
+//       </div>
 
-      <div className="stats-row">
-        {[["10K+", "Training Images"], ["7", "Disease Classes"], ["AI", "Powered Model"]].map(([num, label]) => (
-          <div key={label} style={{ textAlign: "center" }}>
-            <div className="stat-num">{num}</div>
-            <div className="stat-label">{label}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+//       <div className="stats-row">
+//         {[["10K+", "Training Images"], ["7", "Disease Classes"], ["AI", "Powered Model"]].map(([num, label]) => (
+//           <div key={label} style={{ textAlign: "center" }}>
+//             <div className="stat-num">{num}</div>
+//             <div className="stat-label">{label}</div>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
 
 // ─────────────────────────────────────────────
 // MAIN APP
