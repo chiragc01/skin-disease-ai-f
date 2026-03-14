@@ -220,7 +220,7 @@ function MainApp() {
     <div className="app-page">
       <div className="app-topbar">
         <div className="topbar-brand">
-          <img src="/logo.png" alt="Twacha-AI" className="topbar-logo" />
+          <img src="/favicon.png" alt="Twacha-AI" className="topbar-logo" />
           <span className="topbar-name">Twacha-AI</span>
         </div>
         <span style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: 600 }}>AI Skin Analysis</span>
