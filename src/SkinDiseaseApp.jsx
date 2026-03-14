@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 
-// ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
 const CLASS_NAMES = {
   0: "Actinic Keratoses", 1: "Basal Cell Carcinoma",
   2: "Benign Keratosis",  3: "Dermatofibroma",
@@ -23,145 +20,124 @@ const EXPLANATIONS = {
 const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const THEME = {
-  green: { soft: "rgba(34,197,94,0.12)",  border: "rgba(34,197,94,0.3)",  text: "#16a34a", bar: "linear-gradient(90deg,#4ade80,#22c55e)" },
-  amber: { soft: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.3)", text: "#d97706", bar: "linear-gradient(90deg,#fcd34d,#f59e0b)" },
-  red:   { soft: "rgba(239,68,68,0.12)",  border: "rgba(239,68,68,0.3)",  text: "#dc2626", bar: "linear-gradient(90deg,#f87171,#ef4444)" },
+  green: { soft: "#f0fdf4", border: "#86efac", text: "#16a34a", bar: "linear-gradient(90deg,#4ade80,#16a34a)" },
+  amber: { soft: "#fffbeb", border: "#fcd34d", text: "#d97706", bar: "linear-gradient(90deg,#fcd34d,#f59e0b)" },
+  red:   { soft: "#fef2f2", border: "#fca5a5", text: "#dc2626", bar: "linear-gradient(90deg,#f87171,#dc2626)" },
 };
 
-// ─────────────────────────────────────────────
-// CSS
-// ─────────────────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #060918; }
+  body { background: #f0fdf4; }
 
-  .skin-root { min-height: 100vh; background: #060918; font-family: 'Outfit', sans-serif; color: #e2e8f0; overflow-x: hidden; }
+  .skin-root { min-height: 100vh; background: #f0fdf4; font-family: 'Outfit', sans-serif; color: #1e293b; overflow-x: hidden; }
 
-  .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
-  .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(99,102,241,0.22), transparent); top: -150px; left: -100px; animation: floatOrb 10s ease-in-out infinite; }
-  .orb-2 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(236,72,153,0.18), transparent); top: 35%; right: -80px; animation: floatOrb 13s ease-in-out infinite reverse; }
-  .orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(6,182,212,0.14), transparent); bottom: 0; left: 15%; animation: floatOrb 11s ease-in-out infinite 4s; }
-  @keyframes floatOrb { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-30px) scale(1.08); } }
-
-  /* ── LOADER ── */
-  .loader-wrap { position: fixed; inset: 0; z-index: 100; background: #060918; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; transition: opacity 0.8s ease, visibility 0.8s ease; }
+  /* LOADER */
+  .loader-wrap { position: fixed; inset: 0; z-index: 100; background: #f0fdf4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.8s ease, visibility 0.8s ease; }
   .loader-wrap.hide { opacity: 0; visibility: hidden; }
-  .loader-icon { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3)); border: 1px solid rgba(99,102,241,0.4); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 0 40px rgba(99,102,241,0.3); animation: iconPulse 2s ease-in-out infinite; margin-bottom: 4px; }
-  @keyframes iconPulse { 0%,100% { box-shadow: 0 0 40px rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 70px rgba(99,102,241,0.6); } }
-  .loader-title { font-size: 1.5rem; font-weight: 900; color: #f8fafc; letter-spacing: -0.3px; }
-  .loader-sub { font-size: 0.75rem; color: #475569; font-weight: 500; text-align: center; margin-top: 2px; }
+  .loader-icon { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 0 30px rgba(34,197,94,0.3); animation: iconPulse 2s ease-in-out infinite; }
+  @keyframes iconPulse { 0%,100%{box-shadow:0 0 30px rgba(34,197,94,0.3)} 50%{box-shadow:0 0 55px rgba(34,197,94,0.55)} }
+  .loader-title { font-size: 1.5rem; font-weight: 900; color: #14532d; }
+  .loader-sub { font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: -16px; }
   .loader-bar-wrap { width: 220px; }
-  .loader-bar-track { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-  .loader-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
-  .loader-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #475569; text-align: right; margin-top: 6px; }
+  .loader-bar-track { width: 100%; height: 4px; background: #d1fae5; border-radius: 99px; overflow: hidden; }
+  .loader-bar-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
+  .loader-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #6b7280; text-align: right; margin-top: 6px; }
   .loader-dots { display: flex; gap: 6px; }
-  .loader-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(99,102,241,0.4); animation: dotBounce 1.2s ease-in-out infinite; }
+  .loader-dot { width: 6px; height: 6px; border-radius: 50%; background: #86efac; animation: dotBounce 1.2s ease-in-out infinite; }
   .loader-dot:nth-child(2) { animation-delay: 0.2s; }
   .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dotBounce { 0%,100% { transform: translateY(0); background: rgba(99,102,241,0.4); } 50% { transform: translateY(-8px); background: #6366f1; } }
+  @keyframes dotBounce { 0%,100%{transform:translateY(0);background:#86efac} 50%{transform:translateY(-8px);background:#22c55e} }
 
-  /* ── LANDING ── */
-  .landing { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.25rem; text-align: center; transition: opacity 0.6s ease, transform 0.6s ease; }
-  .landing.exit { opacity: 0; transform: translateY(-30px); pointer-events: none; }
-  .landing-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); border-radius: 99px; padding: 6px 16px; font-size: 0.68rem; font-weight: 700; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem; animation: fadeInUp 0.8s ease 0.2s both; }
-  .live-dot { width: 7px; height: 7px; background: #6366f1; border-radius: 50%; animation: livePulse 2s ease infinite; flex-shrink: 0; }
-  @keyframes livePulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.6); } }
-  .landing-title { font-size: clamp(2.4rem, 8vw, 4.5rem); font-weight: 900; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 1.5rem; animation: fadeInUp 0.8s ease 0.4s both; }
-  .grad-text { background: linear-gradient(135deg, #f8fafc 0%, #c7d2fe 40%, #f472b6 70%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .landing-desc { max-width: 480px; font-size: clamp(0.9rem, 2.5vw, 1.05rem); color: #64748b; line-height: 1.7; font-weight: 500; margin-bottom: 2.5rem; animation: fadeInUp 0.8s ease 0.6s both; }
-  .feature-pills { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 2.5rem; animation: fadeInUp 0.8s ease 0.7s both; }
-  .pill { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 99px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 0.75rem; font-weight: 600; color: #64748b; }
-  .landing-cta { display: flex; flex-direction: column; align-items: center; gap: 14px; animation: fadeInUp 0.8s ease 0.8s both; }
-  .btn-predict { display: flex; align-items: center; gap: 12px; padding: 18px 44px; background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7); color: white; border: none; border-radius: 18px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; touch-action: manipulation; box-shadow: 0 8px 32px rgba(99,102,241,0.45), inset 0 1px 0 rgba(255,255,255,0.15); }
-  .btn-predict:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(99,102,241,0.55); }
-  .btn-predict:active { transform: translateY(-1px); }
-  .btn-arrow { font-size: 1.1rem; transition: transform 0.3s; display: inline-block; }
-  .btn-predict:hover .btn-arrow { transform: translateX(5px); }
-  .landing-note { font-size: 0.72rem; color: #334155; font-weight: 500; }
-  .stats-row { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; margin-top: 4rem; animation: fadeInUp 0.8s ease 1s both; }
-  .stat-num { font-size: 1.6rem; font-weight: 900; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .stat-label { font-size: 0.68rem; color: #334155; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* ── APP ── */
-  .app-page { position: relative; z-index: 1; animation: fadeInUp 0.5s ease; }
-  .app-topbar { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(6,9,24,0.85); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 10; }
+  /* APP */
+  .app-page { position: relative; z-index: 1; animation: fadeInUp 0.5s ease; min-height: 100vh; background: #f0fdf4; }
+  .app-topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #d1fae5; background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
   .topbar-brand { display: flex; align-items: center; gap: 10px; }
-  .topbar-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3)); border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-  .topbar-name { font-weight: 800; font-size: 0.95rem; color: #f1f5f9; }
-  .topbar-back { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #64748b; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
-  .topbar-back:hover { background: rgba(255,255,255,0.09); color: #94a3b8; }
+  .topbar-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .topbar-name { font-weight: 800; font-size: 0.95rem; color: #14532d; }
+  .topbar-back { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; color: #16a34a; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+  .topbar-back:hover { background: #dcfce7; }
   .container { max-width: 600px; margin: 0 auto; padding: 2rem 1rem 5rem; }
-  .card { background: rgba(15,23,42,0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 25px 50px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05); animation: fadeInUp 0.4s ease; }
-  .card-title { font-size: 1rem; font-weight: 800; color: #f1f5f9; margin-bottom: 1.25rem; }
+
+  .card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); animation: fadeInUp 0.4s ease; }
+  .card-title { font-size: 1rem; font-weight: 800; color: #14532d; margin-bottom: 1.25rem; }
+
   .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
-  .tab-btn { padding: 13px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.04); color: #94a3b8; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.25s; touch-action: manipulation; }
-  .tab-btn:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
-  .tab-btn.active { background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.2)); border-color: rgba(99,102,241,0.5); color: #c7d2fe; box-shadow: 0 0 20px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1); }
-  .upload-zone { border: 2px dashed rgba(99,102,241,0.3); border-radius: 20px; padding: 3rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; background: rgba(99,102,241,0.04); touch-action: manipulation; }
-  .upload-zone:hover, .upload-zone.drag { border-color: rgba(99,102,241,0.7); background: rgba(99,102,241,0.08); transform: scale(1.01); }
-  .upload-icon-wrap { width: 64px; height: 64px; border-radius: 20px; background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2)); border: 1px solid rgba(99,102,241,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.8rem; }
-  .upload-title { font-weight: 800; color: #e2e8f0; font-size: 0.95rem; margin-bottom: 4px; }
-  .upload-sub { font-size: 0.72rem; color: #475569; }
-  .img-wrap { position: relative; border-radius: 18px; overflow: hidden; margin-bottom: 16px; }
+  .tab-btn { padding: 13px; border-radius: 14px; border: 1px solid #e2e8f0; background: white; color: #64748b; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.25s; }
+  .tab-btn:hover { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+  .tab-btn.active { background: #f0fdf4; border-color: #22c55e; color: #16a34a; box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
+
+  .upload-zone { border: 2px dashed #86efac; border-radius: 18px; padding: 3rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.3s; background: #f0fdf4; }
+  .upload-zone:hover, .upload-zone.drag { border-color: #22c55e; background: #dcfce7; transform: scale(1.01); }
+  .upload-icon-wrap { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.8rem; }
+  .upload-title { font-weight: 800; color: #14532d; font-size: 0.95rem; margin-bottom: 4px; }
+  .upload-sub { font-size: 0.72rem; color: #6b7280; }
+
+  .img-wrap { position: relative; border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
   .img-wrap img { width: 100%; max-height: 280px; object-fit: cover; display: block; }
-  .img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.5)); }
-  .close-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 36px; height: 36px; color: white; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
-  .btn-primary { width: 100%; padding: 15px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 16px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.25s; touch-action: manipulation; box-shadow: 0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.5); }
-  .btn-primary:disabled { background: rgba(99,102,241,0.3); cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-secondary { padding: 15px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #94a3b8; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; width: 100%; }
-  .btn-secondary:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
-  .btn-ghost { width: 100%; padding: 15px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; color: #94a3b8; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
-  .btn-ghost:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+  .img-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.3)); }
+  .close-btn { position: absolute; top: 10px; right: 10px; background: white; border: 1px solid #e2e8f0; border-radius: 50%; width: 34px; height: 34px; color: #64748b; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+
+  .btn-primary { width: 100%; padding: 14px; background: #22c55e; color: white; border: none; border-radius: 14px; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 14px rgba(34,197,94,0.35); }
+  .btn-primary:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
+  .btn-primary:disabled { background: #86efac; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-secondary { padding: 14px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; color: #64748b; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; width: 100%; }
+  .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; }
+  .btn-ghost { width: 100%; padding: 14px; background: white; border: 1px solid #e2e8f0; border-radius: 14px; color: #64748b; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .btn-ghost:hover { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
   .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
   .cam-center { text-align: center; padding: 1.5rem 0; }
-  .cam-icon-wrap { width: 72px; height: 72px; border-radius: 22px; background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(99,102,241,0.15)); border: 1px solid rgba(6,182,212,0.3); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 2rem; }
-  .cam-title { font-weight: 800; color: #e2e8f0; margin-bottom: 4px; font-size: 0.95rem; }
-  .cam-sub { font-size: 0.72rem; color: #475569; margin-bottom: 20px; }
-  .btn-cam-open { padding: 13px 36px; background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(99,102,241,0.2)); border: 1px solid rgba(6,182,212,0.4); border-radius: 16px; color: #67e8f9; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.25s; touch-action: manipulation; }
-  .btn-cam-open:hover { background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(99,102,241,0.3)); transform: translateY(-1px); }
-  .video-wrap { border-radius: 18px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.06); }
+  .cam-icon-wrap { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 2rem; }
+  .cam-title { font-weight: 800; color: #14532d; margin-bottom: 4px; font-size: 0.95rem; }
+  .cam-sub { font-size: 0.72rem; color: #6b7280; margin-bottom: 20px; }
+  .btn-cam-open { padding: 13px 36px; background: #22c55e; border: none; border-radius: 14px; color: white; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.9rem; cursor: pointer; transition: all 0.25s; box-shadow: 0 4px 14px rgba(34,197,94,0.35); }
+  .btn-cam-open:hover { background: #16a34a; transform: translateY(-1px); }
+
+  .video-wrap { border-radius: 16px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid #e2e8f0; }
   .video-wrap video { width: 100%; max-height: 300px; object-fit: cover; display: block; }
-  .error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; gap: 10px; animation: fadeInUp 0.3s ease; }
-  .error-text { color: #fca5a5; font-size: 0.85rem; font-weight: 600; }
-  .result-header { border-radius: 20px; padding: 1.25rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; }
-  .result-header::before { content: ''; position: absolute; inset: 0; opacity: 0.06; background: repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 0, transparent 50%); background-size: 8px 8px; }
+
+  .error-box { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 14px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; gap: 10px; animation: fadeInUp 0.3s ease; }
+  .error-text { color: #dc2626; font-size: 0.85rem; font-weight: 600; }
+
+  .result-header { border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; }
   .result-icon { font-size: 2rem; margin-bottom: 6px; }
-  .result-name { font-size: 1.4rem; font-weight: 900; margin-bottom: 2px; letter-spacing: -0.3px; }
+  .result-name { font-size: 1.4rem; font-weight: 900; margin-bottom: 2px; }
   .result-danger { font-size: 0.72rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.08em; }
-  .conf-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
-  .conf-val { font-family: 'JetBrains Mono', monospace; color: #94a3b8; }
-  .conf-track { width: 100%; height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; border: 1px solid rgba(255,255,255,0.04); margin-bottom: 1.25rem; }
+
+  .conf-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .conf-val { font-family: 'JetBrains Mono', monospace; color: #374151; }
+  .conf-track { width: 100%; height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; margin-bottom: 1.25rem; border: 1px solid #e2e8f0; }
   .conf-bar { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
   @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } }
-  .info-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 1rem; }
-  .info-label { font-size: 0.62rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-  .info-text { font-size: 0.82rem; color: #94a3b8; line-height: 1.5; font-weight: 500; }
-  .action-box { border-radius: 14px; padding: 1rem; margin-top: 10px; }
+  .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+  .info-label { font-size: 0.62rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .info-text { font-size: 0.82rem; color: #374151; line-height: 1.5; font-weight: 500; }
+  .action-box { border-radius: 12px; padding: 1rem; margin-top: 10px; }
   .action-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
   .action-text { font-size: 0.88rem; font-weight: 600; line-height: 1.5; }
-  .probs-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; cursor: pointer; padding: 0; touch-action: manipulation; }
-  .probs-label { font-size: 0.65rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .probs-toggle { width: 100%; display: flex; justify-content: space-between; align-items: center; background: none; border: none; cursor: pointer; padding: 0; }
+  .probs-label { font-size: 0.75rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 0.08em; }
   .prob-row { margin-bottom: 12px; }
-  .prob-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #475569; margin-bottom: 5px; }
-  .prob-track { width: 100%; height: 5px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-  .prob-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 99px; transition: width 0.8s ease; }
-  .disclaimer { background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15); border-radius: 16px; padding: 1rem 1.25rem; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 1.25rem; }
-  .disclaimer p { font-size: 0.73rem; color: #475569; line-height: 1.6; font-weight: 500; }
+  .prob-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #6b7280; margin-bottom: 5px; }
+  .prob-track { width: 100%; height: 5px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+  .prob-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; transition: width 0.8s ease; }
+
+  .disclaimer { background: #f0fdf4; border: 1px solid #86efac; border-radius: 14px; padding: 1rem 1.25rem; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 1.25rem; }
+  .disclaimer p { font-size: 0.73rem; color: #6b7280; line-height: 1.6; font-weight: 500; }
+
   .loading-text { display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb { background: #86efac; border-radius: 99px; }
 `;
 
-// ─────────────────────────────────────────────
-// LOADER
-// ─────────────────────────────────────────────
 function Loader({ onDone }) {
   const [pct, setPct] = useState(0);
   const [hide, setHide] = useState(false);
@@ -169,10 +145,8 @@ function Loader({ onDone }) {
 
   useEffect(() => {
     const steps = [
-      { val: 30,  delay: 200 },
-      { val: 60,  delay: 700 },
-      { val: 85,  delay: 1200 },
-      { val: 100, delay: 1700 },
+      { val: 30, delay: 200 }, { val: 60, delay: 700 },
+      { val: 85, delay: 1200 }, { val: 100, delay: 1700 },
     ];
     steps.forEach(({ val, delay }) => {
       setTimeout(() => {
@@ -185,11 +159,9 @@ function Loader({ onDone }) {
 
   return (
     <div className={"loader-wrap" + (hide ? " hide" : "")}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div className="loader-icon">🔬</div>
-        <p className="loader-title">SkinAI</p>
-        <p className="loader-sub">Initializing AI </p>
-      </div>
+      <div className="loader-icon">🔬</div>
+      <p className="loader-title">SkinAI</p>
+      <p className="loader-sub">AI-Powered Skin Analysis</p>
       <div className="loader-bar-wrap">
         <div className="loader-bar-track">
           <div ref={barRef} className="loader-bar-fill" />
@@ -197,73 +169,13 @@ function Loader({ onDone }) {
         <p className="loader-pct">{pct}%</p>
       </div>
       <div className="loader-dots">
-        <div className="loader-dot" />
-        <div className="loader-dot" />
-        <div className="loader-dot" />
+        <div className="loader-dot" /><div className="loader-dot" /><div className="loader-dot" />
       </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────
-// LANDING PAGE
-// ─────────────────────────────────────────────
-// function LandingPage({ onEnter }) {
-//   const [exiting, setExiting] = useState(false);
-
-//   const handleEnter = () => {
-//     setExiting(true);
-//     setTimeout(onEnter, 600);
-//   };
-
-//   return (
-//     <div className={"landing" + (exiting ? " exit" : "")}>
-//       <div className="landing-badge">
-//         <div className="live-dot" />
-//         AI Skin Analysis · 7 Disease Classes
-//       </div>
-
-//       <h1 className="landing-title">
-//         <span className="grad-text">Predict Skin</span>
-//         <br />
-//         <span className="grad-text">Disease Instantly</span>
-//       </h1>
-
-//       <p className="landing-desc">
-//         Upload a photo or use your camera. Our AI model trained on 10,000+ medical
-//         images gives you an instant skin disease prediction with clear, actionable advice.
-//       </p>
-
-//       <div className="feature-pills">
-//         {["🔬 AI Powered", "📷 Live Camera", "⚡ Instant Results", "🩺 7 Disease Classes"].map(f => (
-//           <div key={f} className="pill">{f}</div>
-//         ))}
-//       </div>
-
-//       <div className="landing-cta">
-//         <button className="btn-predict" onClick={handleEnter}>
-//           🔬 Predict Disease
-//           <span className="btn-arrow">→</span>
-//         </button>
-//         <p className="landing-note">No sign up required · Free to use</p>
-//       </div>
-
-//       <div className="stats-row">
-//         {[["10K+", "Training Images"], ["7", "Disease Classes"], ["AI", "Powered Model"]].map(([num, label]) => (
-//           <div key={label} style={{ textAlign: "center" }}>
-//             <div className="stat-num">{num}</div>
-//             <div className="stat-label">{label}</div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// ─────────────────────────────────────────────
-// MAIN APP
-// ─────────────────────────────────────────────
-function MainApp({ onBack }) {
+function MainApp() {
   const [tab, setTab] = useState("upload");
   const [preview, setPreview] = useState(null);
   const [file, setFile] = useState(null);
@@ -347,7 +259,7 @@ function MainApp({ onBack }) {
       if (!res.ok) throw new Error();
       setResult(await res.json());
     } catch {
-      setError("Could not connect to AI server. Make sure FastAPI is running on port 8000.");
+      setError("Could not connect to AI server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -358,50 +270,38 @@ function MainApp({ onBack }) {
   const confText = result
     ? result.confidence >= 80 ? "Very confident"
     : result.confidence >= 60 ? "Fairly confident"
-    : result.confidence >= 40 ? "Moderate"
-    : "Low confidence"
+    : result.confidence >= 40 ? "Moderate" : "Low confidence"
     : "";
 
   return (
     <div className="app-page">
-      {/* Top bar */}
       <div className="app-topbar">
         <div className="topbar-brand">
           <div className="topbar-icon">🔬</div>
           <span className="topbar-name">SkinAI</span>
         </div>
-        <button className="topbar-back" onClick={() => { reset(); closeCamera(); onBack(); }}>
-          ← Back
-        </button>
+        <span style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: 600 }}>AI Skin Analysis</span>
       </div>
 
       <div className="container">
-
-        {/* Tabs */}
         <div className="tabs">
           {[{ id: "upload", label: "📁  Upload Image" }, { id: "camera", label: "📷  Live Camera" }].map(t => (
-            <button
-              key={t.id}
-              className={"tab-btn" + (tab === t.id ? " active" : "")}
-              onClick={() => { setTab(t.id); reset(); closeCamera(); }}
-            >
+            <button key={t.id} className={"tab-btn" + (tab === t.id ? " active" : "")}
+              onClick={() => { setTab(t.id); reset(); closeCamera(); }}>
               {t.label}
             </button>
           ))}
         </div>
 
-        {/* Upload Tab */}
         {tab === "upload" && (
           <div className="card">
             <p className="card-title">Upload Skin Image</p>
             {!preview ? (
-              <div
-                className={"upload-zone" + (dragOver ? " drag" : "")}
+              <div className={"upload-zone" + (dragOver ? " drag" : "")}
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={onDrop}
-                onClick={() => fileInputRef.current.click()}
-              >
+                onClick={() => fileInputRef.current.click()}>
                 <div className="upload-icon-wrap">📤</div>
                 <p className="upload-title">{isMobile ? "Tap to upload image" : "Click or drag image here"}</p>
                 <p className="upload-sub">JPG, JPEG, PNG supported</p>
@@ -422,12 +322,10 @@ function MainApp({ onBack }) {
           </div>
         )}
 
-        {/* Camera Tab */}
         {tab === "camera" && (
           <div className="card">
             <p className="card-title">Live Camera Capture</p>
             <canvas ref={canvasRef} style={{ display: "none" }} />
-
             {!cameraOpen && !preview && (
               <div className="cam-center">
                 <div className="cam-icon-wrap">📷</div>
@@ -436,19 +334,15 @@ function MainApp({ onBack }) {
                 <button className="btn-cam-open" onClick={openCamera}>📷  Open Camera</button>
               </div>
             )}
-
             {cameraOpen && !preview && (
               <div>
-                <div className="video-wrap">
-                  <video ref={videoRef} autoPlay playsInline muted />
-                </div>
+                <div className="video-wrap"><video ref={videoRef} autoPlay playsInline muted /></div>
                 <div className="btn-grid">
                   <button className="btn-secondary" onClick={closeCamera}>❌  Cancel</button>
                   <button className="btn-primary" onClick={capturePhoto}>📸  Take Photo</button>
                 </div>
               </div>
             )}
-
             {preview && !cameraOpen && (
               <div>
                 <div className="img-wrap">
@@ -466,7 +360,6 @@ function MainApp({ onBack }) {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="error-box">
             <span>⚠️</span>
@@ -474,20 +367,17 @@ function MainApp({ onBack }) {
           </div>
         )}
 
-        {/* Results */}
         {result && exp && theme && (
           <>
             <div className="card">
-              <p style={{ fontSize: "0.62rem", fontWeight: 700, color: "#334155", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
+              <p style={{ fontSize: "0.62rem", fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
                 Diagnosis Result
               </p>
-
-              <div className="result-header" style={{ background: theme.soft, border: `1px solid ${theme.border}`, color: theme.text }}>
+              <div className="result-header" style={{ background: theme.soft, border: `1px solid ${theme.border}` }}>
                 <div className="result-icon">{exp.icon}</div>
                 <p className="result-name" style={{ color: theme.text }}>{result.name}</p>
                 <p className="result-danger" style={{ color: theme.text }}>{exp.danger}</p>
               </div>
-
               <div className="conf-labels">
                 <span>Confidence</span>
                 <span className="conf-val">{result.confidence.toFixed(1)}% · {confText}</span>
@@ -495,12 +385,10 @@ function MainApp({ onBack }) {
               <div className="conf-track">
                 <div className="conf-bar" style={{ width: `${result.confidence}%`, background: theme.bar }} />
               </div>
-
               <div className="info-grid">
                 <div className="info-box"><p className="info-label">What is it?</p><p className="info-text">{exp.what}</p></div>
                 <div className="info-box"><p className="info-label">Who gets it?</p><p className="info-text">{exp.common}</p></div>
               </div>
-
               <div className="action-box" style={{ background: theme.soft, border: `1px solid ${theme.border}` }}>
                 <p className="action-label" style={{ color: theme.text }}>
                   {exp.color === "green" ? "✅ Recommended Action" : exp.color === "amber" ? "⚡ What To Do" : "🚨 Urgent Action"}
@@ -512,7 +400,7 @@ function MainApp({ onBack }) {
             <div className="card">
               <button className="probs-toggle" onClick={() => setShowAllProbs(!showAllProbs)}>
                 <span className="probs-label">All Possibilities</span>
-                <span style={{ color: "#334155", fontSize: "0.75rem", display: "inline-block", transform: showAllProbs ? "rotate(180deg)" : "none", transition: "0.2s" }}>▼</span>
+                <span style={{ color: "#9ca3af", fontSize: "0.75rem", display: "inline-block", transform: showAllProbs ? "rotate(180deg)" : "none", transition: "0.2s" }}>▼</span>
               </button>
               {showAllProbs && (
                 <div style={{ marginTop: "1rem" }}>
@@ -544,9 +432,6 @@ function MainApp({ onBack }) {
   );
 }
 
-// ─────────────────────────────────────────────
-// ROOT
-// ─────────────────────────────────────────────
 export default function SkinDiseaseApp() {
   const [screen, setScreen] = useState("loader");
 
@@ -554,12 +439,8 @@ export default function SkinDiseaseApp() {
     <>
       <style>{css}</style>
       <div className="skin-root">
-        <div className="orb orb-1" />
-        {/* <div className="orb orb-2" /> */}
-        <div className="orb orb-3" />
-         {screen === "loader"  && <Loader onDone={() => setScreen("app")} />}
-          {/* {screen === "landing" && <LandingPage onEnter={() => setScreen("app")} />} */}
-        {screen === "app"     && <MainApp onBack={() => setScreen("landing")} />}
+        {screen === "loader" && <Loader onDone={() => setScreen("app")} />}
+        {screen === "app"    && <MainApp />}
       </div>
     </>
   );
