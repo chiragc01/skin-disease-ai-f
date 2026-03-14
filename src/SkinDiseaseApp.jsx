@@ -558,7 +558,7 @@ export default function SkinDiseaseApp() {
         <div className="orb orb-2" />
         <div className="orb orb-3" />
         {screen === "loader"  && <Loader onDone={() => setScreen("landing")} />}
-        {screen === "landing" && <LandingPage onEnter={() => setScreen("app")} />}
+        {/* {screen === "landing" && <LandingPage onEnter={() => setScreen("app")} />} */}
         {screen === "app"     && <MainApp onBack={() => setScreen("landing")} />}
       </div>
     </>
