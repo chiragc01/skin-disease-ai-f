@@ -555,7 +555,7 @@ export default function SkinDiseaseApp() {
       <style>{css}</style>
       <div className="skin-root">
         <div className="orb orb-1" />
-        <div className="orb orb-2" />
+        {/* <div className="orb orb-2" /> */}
         <div className="orb orb-3" />
         {screen === "loader"  && <Loader onDone={() => setScreen("landing")} />}
         {/* {screen === "landing" && <LandingPage onEnter={() => setScreen("app")} />} */}
