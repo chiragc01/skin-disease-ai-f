@@ -32,31 +32,11 @@ const css = `
 
   .skin-root { min-height: 100vh; background: #f0fdf4; font-family: 'Outfit', sans-serif; color: #1e293b; overflow-x: hidden; }
 
-  /* LOADER */
-  .loader-wrap { position: fixed; inset: 0; z-index: 100; background: #f0fdf4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: opacity 0.8s ease, visibility 0.8s ease; }
-  .loader-wrap.hide { opacity: 0; visibility: hidden; }
-  .loader-icon { width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 0 30px rgba(34,197,94,0.3); animation: iconPulse 2s ease-in-out infinite; }
-  @keyframes iconPulse { 0%,100%{box-shadow:0 0 30px rgba(34,197,94,0.3)} 50%{box-shadow:0 0 55px rgba(34,197,94,0.55)} }
-  .loader-title { font-size: 1.5rem; font-weight: 900; color: #14532d; }
-  .loader-sub { font-size: 0.75rem; color: #6b7280; font-weight: 500; margin-top: -16px; }
-  .loader-bar-wrap { width: 220px; }
-  .loader-bar-track { width: 100%; height: 4px; background: #d1fae5; border-radius: 99px; overflow: hidden; }
-  .loader-bar-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 99px; width: 0%; transition: width 0.5s ease; }
-  .loader-pct { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #6b7280; text-align: right; margin-top: 6px; }
-  .loader-dots { display: flex; gap: 6px; }
-  .loader-dot { width: 6px; height: 6px; border-radius: 50%; background: #86efac; animation: dotBounce 1.2s ease-in-out infinite; }
-  .loader-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dotBounce { 0%,100%{transform:translateY(0);background:#86efac} 50%{transform:translateY(-8px);background:#22c55e} }
-
-  /* APP */
   .app-page { position: relative; z-index: 1; animation: fadeInUp 0.5s ease; min-height: 100vh; background: #f0fdf4; }
   .app-topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #d1fae5; background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
   .topbar-brand { display: flex; align-items: center; gap: 10px; }
-  .topbar-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #bbf7d0, #86efac); border: 1px solid #4ade80; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .topbar-logo { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; background: #f0fdf4; padding: 2px; }
   .topbar-name { font-weight: 800; font-size: 0.95rem; color: #14532d; }
-  .topbar-back { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; color: #16a34a; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-  .topbar-back:hover { background: #dcfce7; }
   .container { max-width: 600px; margin: 0 auto; padding: 2rem 1rem 5rem; }
 
   .card { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); animation: fadeInUp 0.4s ease; }
@@ -137,43 +117,6 @@ const css = `
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #86efac; border-radius: 99px; }
 `;
-
-function Loader({ onDone }) {
-  const [pct, setPct] = useState(0);
-  const [hide, setHide] = useState(false);
-  const barRef = useRef(null);
-
-  useEffect(() => {
-    const steps = [
-      { val: 30, delay: 200 }, { val: 60, delay: 700 },
-      { val: 85, delay: 1200 }, { val: 100, delay: 1700 },
-    ];
-    steps.forEach(({ val, delay }) => {
-      setTimeout(() => {
-        setPct(val);
-        if (barRef.current) barRef.current.style.width = val + "%";
-      }, delay);
-    });
-    setTimeout(() => { setHide(true); setTimeout(onDone, 800); }, 2400);
-  }, []);
-
-  return (
-    <div className={"loader-wrap" + (hide ? " hide" : "")}>
-      <div className="loader-icon">🔬</div>
-      <p className="loader-title">SkinAI</p>
-      <p className="loader-sub">AI-Powered Skin Analysis</p>
-      <div className="loader-bar-wrap">
-        <div className="loader-bar-track">
-          <div ref={barRef} className="loader-bar-fill" />
-        </div>
-        <p className="loader-pct">{pct}%</p>
-      </div>
-      <div className="loader-dots">
-        <div className="loader-dot" /><div className="loader-dot" /><div className="loader-dot" />
-      </div>
-    </div>
-  );
-}
 
 function MainApp() {
   const [tab, setTab] = useState("upload");
@@ -277,8 +220,8 @@ function MainApp() {
     <div className="app-page">
       <div className="app-topbar">
         <div className="topbar-brand">
-          <div className="topbar-icon">🔬</div>
-          <span className="topbar-name">SkinAI</span>
+          <img src="/logo.png" alt="Twacha-AI" className="topbar-logo" />
+          <span className="topbar-name">Twacha-AI</span>
         </div>
         <span style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: 600 }}>AI Skin Analysis</span>
       </div>
@@ -433,14 +376,11 @@ function MainApp() {
 }
 
 export default function SkinDiseaseApp() {
-  const [screen, setScreen] = useState("loader");
-
   return (
     <>
       <style>{css}</style>
       <div className="skin-root">
-        {screen === "loader" && <Loader onDone={() => setScreen("app")} />}
-        {screen === "app"    && <MainApp />}
+        <MainApp />
       </div>
     </>
   );
