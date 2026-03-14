@@ -35,7 +35,7 @@ const css = `
   .app-page { position: relative; z-index: 1; animation: fadeInUp 0.5s ease; min-height: 100vh; background: #f0fdf4; }
   .app-topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #d1fae5; background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
   .topbar-brand { display: flex; align-items: center; gap: 10px; }
-  .topbar-logo { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; background: #f0fdf4; padding: 2px; }
+  .topbar-logo { width: 44px; height: 44px; border-radius: 8px; object-fit: contain; background: #f0fdf4; padding: 2px; }
   .topbar-name { font-weight: 800; font-size: 0.95rem; color: #14532d; }
   .container { max-width: 600px; margin: 0 auto; padding: 2rem 1rem 5rem; }
 
